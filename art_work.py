@@ -15,18 +15,18 @@ class Artwork:
         self.artwork_name = artwork_name
         self.price = price
         self.availability = availability
-
+#creats table for artist
 def create_table_artist():
     with sqlite3.connect(artwork_db) as conn:
         conn.execute('CREATE TABLE IF NOT EXISTS artists (id INTEGER PRIMARY KEY, name TEXT, email TEXT, UNIQUE( name COLLATE NOCASE, email COLLATE NOCASE))')
     conn.close()
-
+#creats table for artworks
 def create_table_artwork():
     with sqlite3.connect(artwork_db) as conn:
         conn.execute('CREATE TABLE IF NOT EXISTS artworks (artwork_id INTEGER PRIMARY KEY, name TEXT UNIQUE, price INT, available BOOLEAN, artist_id INTEGER, FOREIGN KEY(artist_id) REFERENCES artists(id))')
     conn.close()
 
-"""adds data to the the database
+"""adds artist to the the database
 parameters:name, email
 """
 def add_artist(artist):
@@ -40,6 +40,9 @@ def add_artist(artist):
     except sqlite3.IntegrityError:
         print('sorry the name already exists')
 
+"""checks if artist in the databse
+parameters:artist name
+"""
 def check_if_artist_exists(name):
     conn = sqlite3.connect(artwork_db)
     artist_id=conn.execute('SELECT * FROM artists WHERE name LIKE ?', (name, ))
@@ -51,6 +54,9 @@ def check_if_artist_exists(name):
     else:
         return artist_found
 
+"""checks if artwork in the database
+parameters:artwork name
+"""
 def check_if_artwork_exists(artwork_name):
     conn = sqlite3.connect(artwork_db)
     search_artworks=conn.execute('SELECT * FROM artworks WHERE name LIKE ?', (artwork_name, ))
@@ -62,16 +68,21 @@ def check_if_artwork_exists(artwork_name):
     else:
         return artwork_found
 
+"""adds artwork to the the database
+parameters:artwork list with artist ID
+"""
 def add_artwork(artwork):
     try:
         with sqlite3.connect(artwork_db) as conn:
             conn.execute('INSERT INTO artworks (name, price, available, artist_id) VALUES (?, ?, ?, ?)',
             (artwork.artwork_name, artwork.price, artwork.availability, artwork.artist_ID))
         conn.close()
-        #return True
     except sqlite3.IntegrityError:
         print('sorry the name already exists')
 
+"""gets all artwork from the database
+parameters:artist's ID
+"""
 def display_artwork(artist_id):
     conn = sqlite3.connect(artwork_db)
     artworks_found = conn.execute('SELECT * FROM artworks WHERE artist_id LIKE ?', (artist_id, ))
@@ -81,7 +92,9 @@ def display_artwork(artist_id):
     conn.close()
     return artworks
 
-
+"""updates wether artwork is sold or available 
+parameters: availability and artwork name
+"""
 def change_availability(availability, artwork_name):
     try:
         with sqlite3.connect(artwork_db) as conn:
@@ -91,6 +104,9 @@ def change_availability(availability, artwork_name):
     except sqlite3.IntegrityError:
         print('sorry the artwork name does not exists')
 
+"""deletes artwork from database
+parameters:artwork name
+"""
 def delete_artwork(artwork_name):
     try:
         with sqlite3.connect(artwork_db) as conn:
