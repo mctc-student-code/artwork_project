@@ -1,52 +1,58 @@
 import sqlite3
 
-artwork_db='artwork.sqlite'
+artwork_db = 'artwork.sqlite'
 
 class Artist:
-
-    def __init__(self, name, email,id=None):
+    def __init__(self, name, email, id=None):
         self.name = name
         self.email = email
         self.id = id
 
+        
 class Artwork:
     def __init__(self, artist_ID, artwork_name, price, availability):
         self.artist_ID = artist_ID
         self.artwork_name = artwork_name
         self.price = price
         self.availability = availability
-#creats table for artist
+        
+        
 def create_table_artist():
     with sqlite3.connect(artwork_db) as conn:
         conn.execute('CREATE TABLE IF NOT EXISTS artists (id INTEGER PRIMARY KEY, name TEXT, email TEXT, UNIQUE( name COLLATE NOCASE, email COLLATE NOCASE))')
     conn.close()
-#creats table for artworks
+    
+    
 def create_table_artwork():
     with sqlite3.connect(artwork_db) as conn:
         conn.execute('CREATE TABLE IF NOT EXISTS artworks (artwork_id INTEGER PRIMARY KEY, name TEXT UNIQUE, price INT, available BOOLEAN, artist_id INTEGER, FOREIGN KEY(artist_id) REFERENCES artists(id))')
     conn.close()
 
-"""adds artist to the the database
-parameters:name, email
-"""
+
 def add_artist(artist):
+    """
+    adds artist to the the database and generates ID.  Indicates error if artist name or email are duplicates.
+    parameters: artist - an artist object
+    """
+
     try:
         with sqlite3.connect(artwork_db) as conn:
             res = conn.execute('INSERT INTO artists (name, email) VALUES (?, ?)', (artist.name, artist.email))
-            new_id=res.lastrowid
-            artist.id=new_id
+            new_id = res.lastrowid
+            artist.id = new_id
         conn.close()
-        #return True
     except sqlite3.IntegrityError:
-        print('sorry the name already exists')
+        print('sorry the name already exists') 
 
-"""checks if artist in the databse
-parameters:artist name
-"""
+        
 def check_if_artist_exists(name):
+    """checks if artist in the databse
+    parameters:artist name
+    returns: a tuple of artist information, if an artist with the given name is in the database. False otherwise
+    """
     conn = sqlite3.connect(artwork_db)
-    artist_id=conn.execute('SELECT * FROM artists WHERE name LIKE ?', (name, ))
-    artist_found=artist_id.fetchone()
+    results = conn.execute('SELECT * FROM artists WHERE name LIKE ?', (name, ))
+    artist_found = results.fetchone()
     conn.close()
 
     if artist_found is None:
@@ -54,6 +60,7 @@ def check_if_artist_exists(name):
     else:
         return artist_found
 
+    
 """checks if artwork in the database
 parameters:artwork name
 """
